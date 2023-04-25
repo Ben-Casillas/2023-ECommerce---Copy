@@ -119,4 +119,17 @@ public class OrderRepository : IOrderRepository
 
         }
     }
+
+    public async Task<IEnumerable<Order>> GetAllProducts()
+    {
+        string sql = "SELECT * FROM orders";
+
+        using (var connection = _context.CreateConnection())
+        {
+            var orders = await connection.QueryAsync<Order>(sql);
+            return orders;
+        }
+    }
+
+
 }

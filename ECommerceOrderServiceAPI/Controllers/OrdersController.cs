@@ -69,4 +69,26 @@ public class OrdersController : ControllerBase
         }
     }
 
+
+    [HttpGet]
+    [Route("")]
+    public async Task<IActionResult> GetAllProducts()
+    {
+        try
+        {
+            var data = await _ordersRepository.GetAllProducts();
+            return Ok(new
+            {
+                Success = true,
+                Message = "All Order items returned.",
+                Data = data
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return StatusCode(500, ex.Message);
+        }
+    }
+
 }

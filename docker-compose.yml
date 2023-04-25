@@ -1,9 +1,4 @@
 version: "3.8"
-
-networks:
-  ECommerce:
-    external: false
-
 services:
   ECommerceDBMongo:
     container_name: ECommerceDBMongo
@@ -12,6 +7,8 @@ services:
     hostname: ECommerceDBMongo
     ports:
       - "27017:27017"
+    volumes:
+      - mongodb_data_container:/data/db
     networks:
       - ECommerce
 
@@ -22,21 +19,24 @@ services:
     hostname: ECommerceBasketRedis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_cache:/data
     networks:
       - ECommerce
 
   ECommerceOrdersDBSQL:
     container_name: ECommerceOrdersDBSQL
     image: mcr.microsoft.com/mssql/server:2019-latest
-    restart: always
-    hostname: ECommerceOrdersDBSQL
+    environment:
+      SA_PASSWORD: abc123!!@
+      ACCEPT_EULA: Y
     ports:
       - "1433:1433"
+    volumes:
+      - mssqldata:/var/opt/mssql
     networks:
       - ECommerce
-    environment:
-      SA_PASSWORD: "abc123!!@"
-      ACCEPT_EULA: "Y"
+
 
   ECommerceEurekaRegistry:
     container_name: ECommerceEurekaRegistry
@@ -122,6 +122,12 @@ services:
       - ECommerceOrdersDBSQL
       - ECommerceEurekaRegistry
       - ECommerceAPIGatewayOcelot
-    environment:
-      SA_PASSWORD: "abc123!!@"
-      ACCEPT_EULA: "Y"
+
+volumes:
+  mongodb_data_container:
+  mssqldata:
+  redis_cache:
+    driver: local
+
+networks:
+  ECommerce:
