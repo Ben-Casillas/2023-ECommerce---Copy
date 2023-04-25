@@ -1,0 +1,127 @@
+version: "3.8"
+
+networks:
+  ECommerce:
+    external: false
+
+services:
+  ECommerceDBMongo:
+    container_name: ECommerceDBMongo
+    image: mongo:latest
+    restart: always
+    hostname: ECommerceDBMongo
+    ports:
+      - "27017:27017"
+    networks:
+      - ECommerce
+
+  ECommerceBasketRedis:
+    container_name: ECommerceBasketRedis
+    image: redis:latest
+    restart: always
+    hostname: ECommerceBasketRedis
+    ports:
+      - "6379:6379"
+    networks:
+      - ECommerce
+
+  ECommerceOrdersDBSQL:
+    container_name: ECommerceOrdersDBSQL
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    restart: always
+    hostname: ECommerceOrdersDBSQL
+    ports:
+      - "1433:1433"
+    networks:
+      - ECommerce
+    environment:
+      SA_PASSWORD: "abc123!!@"
+      ACCEPT_EULA: "Y"
+
+  ECommerceEurekaRegistry:
+    container_name: ECommerceEurekaRegistry
+    image: steeltoeoss/eureka-server:latest
+    restart: always
+    hostname: ECommerceEurekaRegistry
+    ports:
+      - 8761:8761
+    networks:
+      - ECommerce
+
+  ECommerceAPIGatewayOcelot:
+    container_name: ECommerceAPIGatewayOcelot
+    build:
+      context: ./ECommerceApiGatewayFinal
+      dockerfile: Dockerfile
+    image: ecommerceapigatewayocelot:1
+    restart: always
+    hostname: ECommerceAPIGatewayOcelot
+    ports:
+      - 5041:80
+    networks:
+      - ECommerce
+
+  ECommerceItemServiceAPI:
+    container_name: ECommerceItemServiceAPI
+    build:
+      context: ./ECommerceItemServiceAPI
+      dockerfile: Dockerfile
+    image: ecommerceitemserviceapi:1
+    restart: always
+    hostname: ECommerceItemServiceAPI
+    ports:
+      - "5051:8080"
+    networks:
+      - ECommerce
+    depends_on:
+      - ECommerceDBMongo
+      - ECommerceEurekaRegistry
+      - ECommerceAPIGatewayOcelot
+    environment:
+      - SERVER_PORT:5050
+      - MONGO_HOST:ECommerceDBMongo
+      - MONGO_PORT:27017
+      - MONGO_DB:ItemService
+      - EUREKA_HOST:ECommerceEurekaRegistry
+
+  ECommerceBasketServiceAPI:
+    container_name: ECommerceBasketServiceAPI
+    build:
+      context: ./ECommerceBasketServiceAPI
+      dockerfile: Dockerfile
+    image: ecommercebasketserviceapi:1
+    restart: always
+    hostname: ECommerceBasketServiceAPI
+    ports:
+      - "8092:8080"
+    networks:
+      - ECommerce
+    depends_on:
+      - ECommerceBasketRedis
+      - ECommerceEurekaRegistry
+      - ECommerceAPIGatewayOcelot
+    environment:
+      - SERVER_PORT:8080
+      - REDIS_HOST:ECommerceBasketRedis
+      - REDIS_PORT:6379
+      - EUREKA_HOST:ECommerceEurekaRegistry
+
+  ECommerceOrderServiceAPI:
+    container_name: ECommerceOrderServiceAPI
+    build:
+      context: ./ECommerceOrderServiceAPI
+      dockerfile: Dockerfile
+    image: ecommerceorderserviceapi:1
+    restart: always
+    hostname: ECommerceOrderServiceAPI
+    ports:
+      - "8083:80"
+    networks:
+      - ECommerce
+    depends_on:
+      - ECommerceOrdersDBSQL
+      - ECommerceEurekaRegistry
+      - ECommerceAPIGatewayOcelot
+    environment:
+      SA_PASSWORD: "abc123!!@"
+      ACCEPT_EULA: "Y"

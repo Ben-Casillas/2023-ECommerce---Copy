@@ -1,0 +1,73 @@
+{
+  "Routes": [
+    {
+      "ServiceName": "ItemServiceAPI",
+      "DownstreamPathTemplate": "/{everything}",
+      "UpstreamPathTemplate": "/itemserviceapi/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 15
+      },
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection",
+        "Key": null,
+        "Expiry": 0
+      }
+    },
+    {
+      "ServiceName": "BasketServiceAPI",
+      "DownstreamPathTemplate": "/{everything}",
+      "UpstreamPathTemplate": "/basketserviceapi/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 15
+      },
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection",
+        "Key": null,
+        "Expiry": 0
+      }
+    },
+    {
+      "ServiceName": "OrderServiceAPI",
+      "DownstreamPathTemplate": "/{everything}",
+      "UpstreamPathTemplate": "/ordersapi/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "FileCacheOptions": {
+        "TtlSeconds": 15
+      },
+      "LoadBalancerOptions": {
+        "Type": "LeastConnection",
+        "Key": null,
+        "Expiry": 0
+      }
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://APIGateway:80",
+    "RequestIdKey": "OcRequestId",
+    "DownstreamScheme": "http",
+    "ReRoutesCaseSensitive": false,
+    "UseServiceDiscovery": true,
+    "ServiceDiscoveryProvider": {
+      "Host": "ECommerceEurekaRegistry",
+      "Port": 8761,
+      "Type": "Eureka"
+    }
+  }
+}
